@@ -54,7 +54,7 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Naming Series",
-   "options": "JE-.YY.-MM-.#####"
+   "options": "JE-.YY.-.MM.-.#####"
   },
   {
    "fieldname": "title",
@@ -207,7 +207,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-18 19:03:37.763514",
+ "modified": "2025-10-18 23:37:12.588959",
  "modified_by": "Administrator",
  "module": "Journal Plus",
  "name": "Expense Entry",
