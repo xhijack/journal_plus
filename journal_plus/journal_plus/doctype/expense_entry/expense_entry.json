@@ -11,6 +11,7 @@
   "naming_series",
   "title",
   "payment_to",
+  "currency",
   "column_break_auqu",
   "company",
   "mode_of_payment",
@@ -100,12 +101,14 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "now",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Posting Date",
    "reqd": 1
   },
   {
+   "default": "now",
    "fieldname": "required_date",
    "fieldtype": "Date",
    "label": "Required Date"
@@ -191,13 +194,20 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "Draft\nSubmitted\nCancelled"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-18 17:57:28.323219",
+ "modified": "2025-10-18 19:03:37.763514",
  "modified_by": "Administrator",
  "module": "Journal Plus",
  "name": "Expense Entry",

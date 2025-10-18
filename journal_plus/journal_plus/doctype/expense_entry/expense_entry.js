@@ -14,8 +14,16 @@ frappe.ui.form.on("Expense Entry", {
                     }, "View");
                 }
 	},
-    on_load(frm) {
-        
+    setup(frm) {
+        frm.set_query("expense_account", 'details', () => {
+			return {
+				filters: [
+					["Account", "root_type", "=", "Expense"],
+                    ["Account", "is_group", "=", "0"],
+                    ["Account", "company", "=", frm.doc.company]
+				]
+			}
+		});
     },
     mode_of_payment(frm){
         erpnext.accounts.pos.get_payment_mode_account(frm, frm.doc.mode_of_payment, function(account){
