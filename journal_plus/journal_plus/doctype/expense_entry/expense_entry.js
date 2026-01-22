@@ -14,6 +14,22 @@ frappe.ui.form.on("Expense Entry", {
                     }, "View");
                 }
 	},
+    cost_center(frm){
+        if (!frm.doc.cost_center) return;
+        (frm.doc.details || []).forEach(row => {
+            if (!row.cost_center) {
+                frappe.model.set_value(row.doctype, row.name, 'cost_center', frm.doc.cost_center);
+            }
+        });
+    },
+    project(frm){
+        if (!frm.doc.project) return;
+        (frm.doc.details || []).forEach(row => {
+            if (!row.project) {
+                frappe.model.set_value(row.doctype, row.name, 'project', frm.doc.project);
+            }
+        });
+    },
     setup(frm) {
         frm.set_query("expense_account", 'details', () => {
 			return {
@@ -24,6 +40,20 @@ frappe.ui.form.on("Expense Entry", {
 				]
 			}
 		});
+        frm.set_query("cost_center", 'details', () => {
+			return {
+				filters: [
+                    ["Cost Center", "company", "=", frm.doc.company]
+				]
+			}
+		});
+        frm.set_query("project", 'details', () => {
+			return {
+				filters: [
+                    ["Project", "company", "=", frm.doc.company]
+				]
+			}
+		});
     },
     mode_of_payment(frm){
         erpnext.accounts.pos.get_payment_mode_account(frm, frm.doc.mode_of_payment, function(account){
@@ -31,6 +61,7 @@ frappe.ui.form.on("Expense Entry", {
 			frm.set_value('account_paid_from', account);
 		})
     },
+    
 });
 
 frappe.ui.form.on("Expense Entry Detail", {
@@ -49,5 +80,14 @@ frappe.ui.form.on("Expense Entry Detail", {
         }).catch(() => {
             frappe.model.set_value(cdt, cdn, 'expense_account', '');
         });
+    },
+    details_add(frm, cdt, cdn){
+        const row = locals[cdt][cdn];
+        if (frm.doc.cost_center && !row.cost_center) {
+            frappe.model.set_value(cdt, cdn, 'cost_center', frm.doc.cost_center);
+        }
+        if (frm.doc.project && !row.project) {
+            frappe.model.set_value(cdt, cdn, 'project', frm.doc.project);
+        }
     }
 });
