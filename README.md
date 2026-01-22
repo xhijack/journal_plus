@@ -15,6 +15,13 @@ No more manual debit/credit entries — just record your expenses, incomes, or f
 - Fully integrated with ERPNext’s accounting structure.  
 - Cancel and deletion behavior follow ERPNext accounting best practices.  
 
+### 🧩 Accounting Dimensions
+- Seamless integration with ERPNext **Accounting Dimensions**.  
+- Add contextual metadata (like Branch, Cost Center, or Department) to every entry line.  
+- Dimension-based reporting for financial analysis and budget control.
+- Automatically create custom field based on accounting dimensions  
+
+
 ### 💰 Income Entry *(coming soon)*
 - Simplify revenue recording for non-finance users.  
 - Automatically maps income to the correct accounts.  
@@ -25,10 +32,6 @@ No more manual debit/credit entries — just record your expenses, incomes, or f
 - Auto-posts both debit and credit sides with validation logic.  
 - Perfect for inter-department or inter-branch transactions.  
 
-### 🧩 Accounting Dimensions *(planned)*
-- Seamless integration with ERPNext **Accounting Dimensions**.  
-- Add contextual metadata (like Branch, Cost Center, or Department) to every entry line.  
-- Dimension-based reporting for financial analysis and budget control.  
 
 ---
 
