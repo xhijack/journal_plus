@@ -11,7 +11,7 @@
   "description",
   "remarks",
   "amount",
-  "referrence",
+  "reference",
   "accounting_dimensions_section",
   "project",
   "column_break_mnbe",
@@ -78,16 +78,16 @@
    "label": "Remarks"
   },
   {
-   "fieldname": "referrence",
+   "fieldname": "reference",
    "fieldtype": "Data",
-   "label": "Referrence"
+   "label": "Reference"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-22 23:14:52.006128",
+ "modified": "2026-01-23 00:29:17.856103",
  "modified_by": "Administrator",
  "module": "Journal Plus",
  "name": "Expense Entry Detail",
