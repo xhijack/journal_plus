@@ -7,6 +7,9 @@ from frappe import _
 
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController  # path sesuai versi kamu
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+    get_accounting_dimensions,
+)
 
 def _to_decimal(val):
     """
@@ -22,6 +25,49 @@ def _float_safe(d: Decimal) -> float:
     Quantize decimal to 2 places (for currency) and return float.
     """
     return float(d.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+def apply_accounting_dimensions(gl_entry, row, doc):
+    """
+    Copy accounting dimensions from row or parent doc to GL Entry.
+    Row has priority over parent.
+    """
+    for dim in get_accounting_dimensions():
+        if hasattr(row, dim) and getattr(row, dim):
+            gl_entry[dim] = getattr(row, dim)
+        elif hasattr(doc, dim) and getattr(doc, dim):
+            gl_entry[dim] = getattr(doc, dim)
+
+
+def validate_mandatory_accounting_dimensions(doc):
+    dimensions = get_accounting_dimensions()
+    if not dimensions:
+        return
+
+    for idx, row in enumerate(doc.details or [], start=1):
+        account = row.get("expense_account")
+        if not account:
+            continue
+
+        root_type = frappe.db.get_value("Account", account, "root_type")
+        if root_type != "Expense":
+            continue  # hanya enforce untuk P&L
+
+        for dim in dimensions:
+            mandatory = frappe.db.exists(
+                "Accounting Dimension Default",
+                {"parent": dim, "mandatory_for_pl": 1},
+            )
+            if not mandatory:
+                continue
+
+            value = getattr(row, dim, None) or getattr(doc, dim, None)
+            if not value:
+                frappe.throw(
+                    _(
+                        "Accounting Dimension <b>{0}</b> is mandatory for Profit and Loss.<br>"
+                        "Please fill it in row #{1}."
+                    ).format(dim.replace("_", " ").title(), idx)
+                )
 
 
 class ExpenseEntry(AccountsController):
@@ -77,6 +123,8 @@ class ExpenseEntry(AccountsController):
         When submitted: post GL entries (custom logic) and mark posted_to_gl.
         Then call parent on_submit if exists.
         """
+        validate_mandatory_accounting_dimensions(self)
+
         if not frappe.has_permission(self.doctype, ptype="write", doc=self):
             frappe.throw(_("You don’t have permission to post this document"))
 
@@ -169,7 +217,7 @@ class ExpenseEntry(AccountsController):
             remarks = row.get("remarks") or self.remarks or _("Expense")
             remarks_with_marker = f"{remarks} [{marker}]"
 
-            gl_entries.append({
+            gl_entry = {
                 "posting_date": posting_date,
                 "account": acct,
                 "party_type": row.get("party_type"),
@@ -188,14 +236,18 @@ class ExpenseEntry(AccountsController):
                 "cost_center": row.get("cost_center") or self.cost_center,
                 "project": row.get("project") or self.project,
                 "is_opening": getattr(self, "is_opening", 0)
-            })
+            }
+
+            apply_accounting_dimensions(gl_entry, row, self)
+            gl_entries.append(gl_entry)
+
 
         # Single credit entry
         total_credit_amt = _float_safe(total_debit)
         # Combine detail expense accounts for the 'against' field
         against_list = ", ".join([row.get("expense_account", "") for row in details])
 
-        gl_entries.append({
+        credit_entry = {
             "posting_date": posting_date,
             "account": credit_account,
             "party_type": None,
@@ -214,7 +266,10 @@ class ExpenseEntry(AccountsController):
             "cost_center": self.cost_center,
             "project": self.project,
             "is_opening": getattr(self, "is_opening", 0)
-        })
+        }
+
+        apply_accounting_dimensions(credit_entry, self, self)
+        gl_entries.append(credit_entry)
 
         # Validate balance
         total_debit_dec = sum(_to_decimal(e.get("debit", 0)) for e in gl_entries)

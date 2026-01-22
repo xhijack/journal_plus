@@ -137,13 +137,12 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Accounting Dimension": {
+		"on_update": "journal_plus.migration.create_accounting_dimensions",
+        "validate": "journal_plus.validations.validate_mandatory_dimensions",
+	}
+}
 
 # Scheduled Tasks
 # ---------------
