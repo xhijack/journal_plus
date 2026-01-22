@@ -23,7 +23,6 @@
   "posting_date",
   "required_date",
   "clearance_date",
-  "status",
   "accounting_dimensions_section",
   "project",
   "column_break_pexg",
@@ -87,7 +86,7 @@
    "fieldname": "account_paid_from",
    "fieldtype": "Link",
    "label": "Account Paid From",
-   "link_filters": "[[\"Account\",\"account_type\",\"in\",[\"Bank\",\"Cash\"]],[\"Account\",\"is_group\",\"=\",\"0\"]]",
+   "link_filters": "[[\"Account\",\"account_type\",\"in\",[\"Bank\",\"Cash\"]],[\"Account\",\"is_group\",\"=\",\"0\"],[\"Account\",\"company\",\"=\",\"eval: doc.company\"]]",
    "options": "Account",
    "reqd": 1
   },
@@ -194,12 +193,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Draft\nSubmitted\nCancelled"
-  },
-  {
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
@@ -219,7 +212,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-22 23:11:47.851586",
+ "modified": "2026-01-22 23:38:31.922360",
  "modified_by": "Administrator",
  "module": "Journal Plus",
  "name": "Expense Entry",
@@ -227,6 +220,8 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -240,6 +235,8 @@
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -265,6 +262,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "title, payment_to, payment_reference",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
