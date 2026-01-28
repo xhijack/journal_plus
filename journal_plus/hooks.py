@@ -140,7 +140,7 @@ app_license = "mit"
 doc_events = {
 	"Accounting Dimension": {
 		"on_update": "journal_plus.migration.create_accounting_dimensions",
-        "validate": "journal_plus.validations.validate_mandatory_dimensions",
+        # "validate": "journal_plus.validations.validate_mandatory_dimensions",
 	}
 }
 
