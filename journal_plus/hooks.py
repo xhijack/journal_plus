@@ -144,6 +144,18 @@ doc_events = {
 	}
 }
 
+# Bank Reconciliation
+# -------------------
+# Daftarkan Expense Entry sebagai voucher yang bisa direkonsiliasi. Hook ini dibaca
+# get_doctypes_for_bank_reconciliation() sehingga checkbox "Expense Entry" otomatis
+# muncul di dialog Bank Reconciliation Tool, dan clear_linked_payment_entry() boleh
+# menulis clearance_date ke Expense Entry.
+bank_reconciliation_doctypes = ["Expense Entry"]
+
+# Inject query pencocokan Expense Entry. frappe.get_hooks menggabungkan ini dengan
+# query bawaan erpnext, jadi keduanya jalan berdampingan.
+get_matching_queries = "journal_plus.bank_reconciliation.get_matching_queries"
+
 # Scheduled Tasks
 # ---------------
 
