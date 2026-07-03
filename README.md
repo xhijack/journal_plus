@@ -60,3 +60,6 @@ ERPNext’s default *Journal Entry* is powerful — but built for accountants.
 bench get-app https://github.com/xhijack/journal_plus.git
 bench --site your-site-name install-app journal_plus
 bench migrate
+
+## Contribution
+From PT Sopwer Teknologi Indonesia
