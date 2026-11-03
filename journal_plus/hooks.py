@@ -156,6 +156,20 @@ bank_reconciliation_doctypes = ["Expense Entry"]
 # query bawaan erpnext, jadi keduanya jalan berdampingan.
 get_matching_queries = "journal_plus.bank_reconciliation.get_matching_queries"
 
+# Daftarkan Expense Entry ke rekonsiliasi bank Sopwer AI (tab Saran & Cari dokumen).
+# Diabaikan bila sopwer_ai tidak terpasang. Expense Entry selalu uang keluar dari
+# account_paid_from, sama seperti query pencocokan di atas.
+sopwer_ai_bank_vouchers = [
+	{
+		"doctype": "Expense Entry",
+		"direction": "out",
+		"account": "account_paid_from",
+		"amount": "total",
+		"reference": "payment_reference",
+		"party": "payment_to",
+	}
+]
+
 # Scheduled Tasks
 # ---------------
 
