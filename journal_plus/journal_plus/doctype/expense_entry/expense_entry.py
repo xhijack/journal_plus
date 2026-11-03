@@ -100,11 +100,11 @@ class ExpenseEntry(AccountsController):
             self.total = total
         self.qty = qty
 
-        # Call parent validate if available
-        try:
-            super(ExpenseEntry, self).validate()
-        except AttributeError:
-            pass
+        # Sengaja TIDAK memanggil AccountsController.validate(): validasi itu
+        # mengasumsikan tabel `items`, sedangkan Expense Entry memakai `details`.
+        # Dulu selalu gagal di `self.items` (AttributeError yang ditelan), jadi
+        # tidak pernah berefek; sejak ERPNext 15.124 baris pertamanya
+        # (sync_mapped_discount_with_header) melempar TypeError saat save.
 
     def before_cancel(self):
         """

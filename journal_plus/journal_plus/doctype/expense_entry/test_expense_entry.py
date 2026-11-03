@@ -6,6 +6,12 @@ import unittest
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
 from decimal import Decimal
+from unittest.mock import patch
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
+from erpnext.controllers.accounts_controller import AccountsController
 
 
 class TestExpenseEntry(FrappeTestCase):
@@ -26,7 +32,12 @@ class TestExpenseEntry(FrappeTestCase):
 		# Try to find existing ledger accounts in this company:
 		asset_accounts = frappe.get_all(
 			"Account",
-			filters={"company": self.company, "root_type": "Asset", "is_group": 0},
+			filters={
+				"company": self.company,
+				"root_type": "Asset",
+				"is_group": 0,
+				"account_type": ["in", ["Cash", "Bank"]],
+			},
 			pluck="name",
 			limit_page_length=1,
 		)
@@ -50,6 +61,26 @@ class TestExpenseEntry(FrappeTestCase):
 
 		self.cash_account = asset_accounts[0]
 		self.expense_account = expense_accounts[0]
+		self.cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
+
+		# Site bisa punya dimensi wajib untuk akun P&L; isi dengan nilai pertama yang ada.
+		self.dimension_values = {}
+		for dim in get_accounting_dimensions(as_list=False):
+			value = frappe.db.get_value(dim.document_type, {}, "name")
+			if value:
+				self.dimension_values[dim.fieldname] = value
+
+		self.expense_label = "_Test Expense Label"
+		if not frappe.db.exists("Expense Label", self.expense_label):
+			frappe.get_doc({"doctype": "Expense Label", "title": self.expense_label}).insert(
+				ignore_permissions=True
+			)
+
+		self.mode_of_payment = "_Test Expense MOP"
+		if not frappe.db.exists("Mode of Payment", self.mode_of_payment):
+			frappe.get_doc(
+				{"doctype": "Mode of Payment", "mode_of_payment": self.mode_of_payment, "type": "Cash"}
+			).insert(ignore_permissions=True)
 
 	def tearDown(self):
 		# keep the DB clean for other tests
@@ -61,19 +92,24 @@ class TestExpenseEntry(FrappeTestCase):
 		"""
 		doc = frappe.get_doc({
 			"doctype": "Expense Entry",
+			"title": "Testing Expense Entry",
 			"company": self.company,
 			"posting_date": nowdate(),
+			"required_date": nowdate(),
 			"remarks": "Testing Expense Entry",
+			"mode_of_payment": self.mode_of_payment,
 			"account_paid_from": self.cash_account,
+			"cost_center": self.cost_center,
 			"details": [
 				{
-					"expense_label": None,
+					"expense_label": self.expense_label,
 					"expense_account": self.expense_account,
 					"amount": amount,
 					"remarks": "Biaya perjalanan test"
 				}
 			]
 		})
+		doc.update(self.dimension_values)
 		doc.insert(ignore_permissions=True)
 		return doc
 
@@ -86,6 +122,21 @@ class TestExpenseEntry(FrappeTestCase):
 			filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
 			fields=["account", "debit", "credit", "is_cancelled"]
 		)
+
+	def test_save_existing_entry_skips_items_based_parent_validate(self):
+		# ERPNext 15.124+ membuka AccountsController.validate dengan iterasi
+		# self.get("items"); Expense Entry pakai tabel `details`, jadi None.
+		def upstream_validate(doc):
+			return any(item.get("mapped_additional_discount_amount") for item in doc.get("items"))
+
+		expense = self._make_expense_entry(40000)
+		expense.remarks = "Edit setelah insert"
+
+		with patch.object(AccountsController, "validate", upstream_validate):
+			expense.save(ignore_permissions=True)
+			expense.submit()
+
+		self.assertEqual(expense.docstatus, 1)
 
 	def test_expense_entry_submission_creates_gl_entries(self):
 		expense = self._make_expense_entry(50000)
